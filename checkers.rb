@@ -67,7 +67,7 @@ class Piece
   RED = [[-1,-1],[-1, 1]]
   BLACK = [[1,1],[1,-1]] #forward right, forward left
 
-  attr_accessor :moves, :board, :color
+  attr_accessor :board, :color
   attr_accessor :king, :position
 
   def initialize(position, board, color)
@@ -82,7 +82,13 @@ class Piece
   end
 
   def perform_slide(destination)
-
+    if get_moves.include?(destination)
+      board[destination], board[position] = self, nil
+      position = destination
+    else
+      raise "Illegal Move"
+    end
+    nil
   end
 
   def perform_jump
