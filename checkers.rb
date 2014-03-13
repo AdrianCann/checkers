@@ -92,16 +92,23 @@ class Piece
 
   def move!(destination)
     board[destination], board[position], self.position = self, nil, destination
+    king = true if king_me?
   end
 
-  def perform_jump
+  def jump!(destination)
+    x = (self.position[0] + destination[0])/2 #DRY OUT
+    y = (self.position[1] + destination[1])/2 #DRY OUT, HOW?
+    board[[x,y]] = nil
+    move!(destination)
+    nil
+  end
+
+  def perform_jump(destination)
     if get_jumps.include?(destination)
-      move!(destination)
+      jump!(destination)
     else
       raise "Illegal JUMP"
     end
-    #remove piece from board
-
   end
 
   def move_diffs  #
@@ -156,5 +163,13 @@ class Piece
     return false if board[jumped_pos].nil?
     return false if board[jumped_pos].color == self.color
     valid?(landing_position)
+  end
+
+  def king_me?
+    if color == :R
+      position.first == 0
+    elsif color == :B
+      position.first == 7
+    end
   end
 end
