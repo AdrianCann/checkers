@@ -38,7 +38,7 @@ class Board
         if piece.nil?
           print "| |"
         elsif piece.king
-          print "|K#{piece.color}|"
+          print "|K#{piece.color}"
         else
           print "|#{piece.color}|"
         end
@@ -63,9 +63,9 @@ class Board
 end
 
 class Piece
-  KING = []
   RED = [[-1,-1],[-1, 1]]
   BLACK = [[1,1],[1,-1]] #forward right, forward left
+  KING = RED + BLACK
 
   attr_accessor :board, :color
   attr_accessor :king, :position
@@ -81,15 +81,6 @@ class Piece
     king ? "K#{color}" : "P#{color}"
   end
 
-  def perform_slide(destination)
-    if get_slides.include?(destination)
-      move!(destination)
-    else
-      raise "Illegal Move"
-    end
-    self.position
-  end
-
   def move!(destination)
     board[destination], board[position], self.position = self, nil, destination
     king = true if king_me?
@@ -101,6 +92,15 @@ class Piece
     board[[x,y]] = nil
     move!(destination)
     nil
+  end
+
+  def perform_slide(destination)
+    if get_slides.include?(destination)
+      move!(destination)
+    else
+      raise "Illegal Move"
+    end
+    self.position
   end
 
   def perform_jump(destination)
@@ -147,6 +147,7 @@ class Piece
       landing_position = add_diff(diff, true)
       jumped_pos = add_diff(diff, false)
       jumps << landing_position if valid_jump?(jumped_pos, landing_position)
+      #could be DRYed... dont need two arguments
     end
     jumps
   end
@@ -159,7 +160,6 @@ class Piece
   end
 
   def valid_jump?(jumped_pos, landing_position) #should only need 1 argument
-    #board(piece_to_jump_position) && board(piece_to_jump_position).color != self.color && valid?(landing_position)
     return false if board[jumped_pos].nil?
     return false if board[jumped_pos].color == self.color
     valid?(landing_position)
