@@ -94,6 +94,7 @@ class Piece
   def perform_jump
     #remove piece from board
 
+
   end
 
   def move_diffs  #
@@ -122,6 +123,9 @@ class Piece
   end
 
   def valid?(position) # valid slide
+    position.each do |coordinate|
+      return false unless coordinate.between?(0,7)
+    end
     board[position].nil?
   end
 end
