@@ -4,7 +4,7 @@ class Board
   def initialize # may want to do what was done in chess
     #(fill = true)
     create_grid
-    #fill_grid
+    fill_grid
   end
 
   def create_grid
@@ -12,9 +12,11 @@ class Board
   end
 
   def fill_grid
-    @rows.times do |row|
-
+    @rows[0].each_with_index do |element, i|
+      @rows[0][i] = Piece.new([0,i], self) unless i % 2 == 0
     end
+    #@rows[0].each_with_index
+
   end
 
   def display
@@ -25,7 +27,7 @@ class Board
         elsif piece.king
           print "|K|"
         else
-          print "|C|"
+          print "|P|"
         end
       end
       puts
@@ -48,8 +50,17 @@ class Board
 end
 
 class Piece
-  def initialize
+  attr_reader :moves, :board
+  attr_accessor :king, :position
 
+  def initialize(position, board)
+    @board = board
+    @king = false
+    @position = position
+  end
+
+  def inspect
+    king ? "K" : "P"
   end
 
   def perform_slide
