@@ -12,28 +12,26 @@ class Board
   end
 
   def fill_row(row, color)
-    if row % 2 == 0
+    (row % 2) == 0 ? n = 0 : n = 1 #even vs odd rows
       @rows[row].each_with_index do |element, i|
-        @rows[row][i] = Piece.new([row,i], self, color) unless i % 2 == 0
+        @rows[row][i] = Piece.new([row,i], self, color) unless (i+n) % 2 == 0
       end
-
-    elsif row % 2 != 0
-      @rows[row].each_with_index do |element, i|
-        @rows[row][i] = Piece.new([row, i], self, color) unless (i+1) % 2 == 0
-      end
-    end
-
   end
 
   def fill_grid
-    black_rows = [0,1,2]
-    red_rows = [7,6,5]
-    black_rows.each { |row| fill_row(row, :B) }
-    red_rows.each { |row| fill_row(row, :R) }
+    # black_rows = [0,1,2].each { |row| fill_row(row, :B) }
+   #  red_rows = [7,6,5].each { |row| fill_row(row, :R) }
+    [0,1,2,5,6,7].each do |row|
+      row > 3 ? fill_row(row, :R) : fill_row(row, :B)
+    end
   end
 
   def display
-    @rows.each do |row|
+    print "_"
+    8.times { |x| print "_#{x}_"}
+    puts
+    @rows.each_with_index do |row, i|
+      print i
       row.each do |piece|
         if piece.nil?
           print "| |"
@@ -63,12 +61,12 @@ class Board
 end
 
 class Piece
-  RED = [[-1,-1],[-1, 1]]
-  BLACK = [[1,1],[1,-1]] #forward right, forward left
+  RED = [[-1, -1], [-1, 1]]
+  BLACK = [[1, 1], [1, -1]] #forward right, forward left
   KING = RED + BLACK
 
-  attr_accessor :board, :color
-  attr_accessor :king, :position
+  attr_reader  :color
+  attr_accessor :king, :position, :board #board may not need to be writer w duping
 
   def initialize(position, board, color)
     @board = board
@@ -83,13 +81,17 @@ class Piece
 
   def move!(destination)
     board[destination], board[position], self.position = self, nil, destination
-    king = true if king_me?
+    self.king = true if king_me?
   end
+
+  #def jump!(destination)
+
 
   def jump!(destination)
     x = (self.position[0] + destination[0])/2 #DRY OUT
     y = (self.position[1] + destination[1])/2 #DRY OUT, HOW?
-    board[[x,y]] = nil
+
+    board[[x, y]] = nil
     move!(destination)
     nil
   end
@@ -98,7 +100,7 @@ class Piece
     if get_slides.include?(destination)
       move!(destination)
     else
-      raise "Illegal Move"
+      false
     end
     self.position
   end
@@ -107,7 +109,7 @@ class Piece
     if get_jumps.include?(destination)
       jump!(destination)
     else
-      raise "Illegal JUMP"
+      false
     end
   end
 
@@ -122,15 +124,22 @@ class Piece
   end
 
   def add_diff(diff, jump = false) #make easier to add
-    if jump
-      new_pos_y = self.position[0] + 2 * diff[0]
-      new_pos_x = self.position[1] + 2 * diff[1]
-    else
-      new_pos_y = self.position[0] + diff[0]
-      new_pos_x = self.position[1] + diff[1]
-    end
+    jump ? times = 2 : times = 1
+    new_pos_y = self.position[0] + times * diff[0] #use map! to refactor
+    new_pos_x = self.position[1] + times * diff[1]
     [new_pos_y, new_pos_x]
   end
+
+  #
+  #   if jump
+  #     new_pos_y = self.position[0] + 2 * diff[0]
+  #     new_pos_x = self.position[1] + 2 * diff[1]
+  #   else
+  #     new_pos_y = self.position[0] + diff[0]
+  #     new_pos_x = self.position[1] + diff[1]
+  #   end
+  #   [new_pos_y, new_pos_x]
+  # end
 
   def get_slides
     slides = []
@@ -154,7 +163,7 @@ class Piece
 
   def valid?(position) # valid slide
     position.each do |coordinate|
-      return false unless coordinate.between?(0,7)
+      return false unless coordinate.between?(0,7) #make method on board
     end
     board[position].nil?
   end
@@ -171,5 +180,13 @@ class Piece
     elsif color == :B
       position.first == 7
     end
+  end
+
+  def perform_moves!(move_sequence)
+    move_sequence.each do |move|
+      perform_slide(move) || perform_jump(move)
+    end
+
+
   end
 end
