@@ -64,7 +64,8 @@ end
 
 class Piece
   KING = []
-  PIECE = [[0,1]]
+  RED = [[-1,-1],[-1, 1]]
+  BLACK = [[1,1],[1,-1]] #forward right, forward left
 
   attr_accessor :moves, :board, :color
   attr_accessor :king, :position
@@ -80,8 +81,8 @@ class Piece
     king ? "K#{color}" : "P#{color}"
   end
 
-  def perform_slide(left)
-    add_diff()
+  def perform_slide(destination)
+
   end
 
   def perform_jump
@@ -90,11 +91,27 @@ class Piece
   end
 
   def move_diffs  #
-
+    if self.king
+      KING
+    elsif self.color == :R
+      RED
+    else
+      BLACK
+    end
   end
 
   def add_diff(diff) #make easier to add
-    self.position[0] = self.position[0] + diff[0]
-    self.position[1] = self.position[1] + diff[1]
+    new_pos_y = self.position[0] + diff[0]
+    new_pos_x = self.position[1] + diff[1]
+    [new_pos_y, new_pos_x]
+  end
+
+  def get_moves #need to call whenever I move?
+    new_moves = []
+    self.move_diffs.each do |diff| #move diff gets correct color array of diffs
+      new_moves << add_diff(diff)
+      #add diff to position
+    end
+    moves = new_moves
   end
 end
