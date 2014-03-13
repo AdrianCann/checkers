@@ -11,12 +11,23 @@ class Board
     @rows = Array.new(8) { Array.new(8) }
   end
 
-  def fill_grid
-    @rows[0].each_with_index do |element, i|
-      @rows[0][i] = Piece.new([0,i], self) unless i % 2 == 0
-    end
-    #@rows[0].each_with_index
+  def fill_row(row)
+    if row % 2 == 0
+      @rows[row].each_with_index do |element, i|
+        @rows[row][i] = Piece.new([row,i], self) unless i % 2 == 0
+      end
 
+    elsif row % 2 != 0
+      @rows[row].each_with_index do |element, i|
+        @rows[row][i] = Piece.new([row,i], self) unless (i+1) % 2 == 0
+      end
+    end
+
+  end
+
+  def fill_grid
+    rows_to_fill = [0,1,2,7,6,5]
+    rows_to_fill.each { |row| fill_row(row) }
   end
 
   def display
