@@ -46,37 +46,10 @@ class Board
     nil
   end
 
-  def [](pos)
-    # raise "Square not on board" unless valid?(pos) (write method)
-    x,y = pos
-    @rows[x][y]
-  end
-
-  def []=(pos, piece)
-
-    x,y = pos
-    @rows[x][y] = piece
-  end
-
-end
-
-class Piece
-  RED = [[-1, -1], [-1, 1]]
-  BLACK = [[1, 1], [1, -1]] #forward right, forward left
-  KING = RED + BLACK
-
-  attr_reader  :color
-  attr_accessor :king, :position, :board #board may not need to be writer w duping
-
-  def initialize(position, board, color)
-    @board = board
-    @king = false
-    @position = position
-    @color = color
-  end
-
-  def inspect
-    king ? "K#{color}" : "P#{color}"
+  def perform_moves!(move_sequence)
+    move_sequence.each do |move|
+      perform_slide(move) || perform_jump(move)
+    end
   end
 
   def move!(destination)
@@ -113,6 +86,37 @@ class Piece
     end
   end
 
+  def [](pos)
+    x,y = pos
+    @rows[x][y]
+  end
+
+  def []=(pos, piece)
+    x,y = pos
+    @rows[x][y] = piece
+  end
+
+end
+
+class Piece
+  RED = [[-1, -1], [-1, 1]]
+  BLACK = [[1, 1], [1, -1]] #forward right, forward left
+  KING = RED + BLACK
+
+  attr_reader  :color
+  attr_accessor :king, :position, :board #board may not need to be writer w duping
+
+  def initialize(position, board, color)
+    @board = board
+    @king = false
+    @position = position
+    @color = color
+  end
+
+  def inspect
+    king ? "K#{color}" : "P#{color}"
+  end
+
   def move_diffs  #
     if self.king
       KING
@@ -129,17 +133,6 @@ class Piece
     new_pos_x = self.position[1] + times * diff[1]
     [new_pos_y, new_pos_x]
   end
-
-  #
-  #   if jump
-  #     new_pos_y = self.position[0] + 2 * diff[0]
-  #     new_pos_x = self.position[1] + 2 * diff[1]
-  #   else
-  #     new_pos_y = self.position[0] + diff[0]
-  #     new_pos_x = self.position[1] + diff[1]
-  #   end
-  #   [new_pos_y, new_pos_x]
-  # end
 
   def get_slides
     slides = []
@@ -180,13 +173,5 @@ class Piece
     elsif color == :B
       position.first == 7
     end
-  end
-
-  def perform_moves!(move_sequence)
-    move_sequence.each do |move|
-      perform_slide(move) || perform_jump(move)
-    end
-
-
   end
 end
