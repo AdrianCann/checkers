@@ -83,24 +83,24 @@ class Piece
 
   def perform_slide(destination)
     if get_slides.include?(destination)
-      board[destination], board[position], self.position = self, nil, destination
+      move!(destination)
     else
       raise "Illegal Move"
     end
     self.position
   end
 
-  def perform_jump
-    if get_jumps.include?(destination) #REPEATED LINE
-      board[destination], board[position] = self, nil #REPEATED
-      position = destination #REPEATED
-      #add jumps to array
+  def move!(destination)
+    board[destination], board[position], self.position = self, nil, destination
+  end
 
+  def perform_jump
+    if get_jumps.include?(destination)
+      move!(destination)
     else
       raise "Illegal JUMP"
     end
     #remove piece from board
-
 
   end
 
