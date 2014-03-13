@@ -82,16 +82,23 @@ class Piece
   end
 
   def perform_slide(destination)
-    if get_moves.include?(destination)
-      board[destination], board[position] = self, nil
-      position = destination
+    if get_slides.include?(destination)
+      board[destination], board[position], self.position = self, nil, destination
     else
       raise "Illegal Move"
     end
-    nil
+    self.position
   end
 
   def perform_jump
+    if get_jumps.include?(destination) #REPEATED LINE
+      board[destination], board[position] = self, nil #REPEATED
+      position = destination #REPEATED
+      #add jumps to array
+
+    else
+      raise "Illegal JUMP"
+    end
     #remove piece from board
 
 
@@ -107,19 +114,34 @@ class Piece
     end
   end
 
-  def add_diff(diff) #make easier to add
-    new_pos_y = self.position[0] + diff[0]
-    new_pos_x = self.position[1] + diff[1]
+  def add_diff(diff, jump = false) #make easier to add
+    if jump
+      new_pos_y = self.position[0] + 2 * diff[0]
+      new_pos_x = self.position[1] + 2 * diff[1]
+    else
+      new_pos_y = self.position[0] + diff[0]
+      new_pos_x = self.position[1] + diff[1]
+    end
     [new_pos_y, new_pos_x]
   end
 
-  def get_moves #need to call whenever I move?
-    new_moves = []
+  def get_slides
+    slides = []
     self.move_diffs.each do |diff| #move diff gets correct color array of diffs
       possible_move = add_diff(diff)
-      new_moves << possible_move if valid?(possible_move)
+      slides << possible_move if valid?(possible_move)
     end
-    moves = new_moves
+    slides
+  end
+
+  def get_jumps
+    jumps = []
+    self.move_diffs.each do |diff| #position of piece to be jumped
+      landing_position = add_diff(diff, true)
+      jumped_pos = add_diff(diff, false)
+      jumps << landing_position if valid_jump?(jumped_pos, landing_position)
+    end
+    jumps
   end
 
   def valid?(position) # valid slide
@@ -127,5 +149,12 @@ class Piece
       return false unless coordinate.between?(0,7)
     end
     board[position].nil?
+  end
+
+  def valid_jump?(jumped_pos, landing_position) #should only need 1 argument
+    #board(piece_to_jump_position) && board(piece_to_jump_position).color != self.color && valid?(landing_position)
+    return false if board[jumped_pos].nil?
+    return false if board[jumped_pos].color == self.color
+    valid?(landing_position)
   end
 end
