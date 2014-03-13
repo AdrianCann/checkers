@@ -109,9 +109,13 @@ class Piece
   def get_moves #need to call whenever I move?
     new_moves = []
     self.move_diffs.each do |diff| #move diff gets correct color array of diffs
-      new_moves << add_diff(diff)
-      #add diff to position
+      possible_move = add_diff(diff)
+      new_moves << possible_move if valid?(possible_move)
     end
     moves = new_moves
+  end
+
+  def valid?(position) # valid slide
+    board[position].nil?
   end
 end
