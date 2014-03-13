@@ -48,13 +48,13 @@ class Board
 
   def perform_moves!(move_sequence)
     move_sequence.each do |move|
-      perform_slide(move) || perform_jump(move)
+      perform_slide(move.first) || perform_jump(move.last)
     end
   end
 
-  def move!(destination)
-    board[destination], board[position], self.position = self, nil, destination
-    self.king = true if king_me?
+  def move!(start, destination)
+    self[start], self[destination], self[start].position = nil, self[start], destination
+    piece.king = true if piece.king_me?
   end
 
   #def jump!(destination)
